@@ -3,9 +3,15 @@ const mongoose = require("mongoose");
 const mainRoutes = require("./api-routes/index");
 const { creatUser } = require("./Module/user/controller");
 require("dotenv").config();
+const cors = require("cors")
 
 const app = express();
 app.use(express.json());
+app.use(cors({
+  origin:"*",
+  methods:["GET","POST","PUT","PATCH","DELETE"],
+  credentials:true
+}))
 
 const connection = process.env.DB_CONNECTION;
 mongoose
