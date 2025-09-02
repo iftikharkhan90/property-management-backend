@@ -13,7 +13,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })
-);
+);  
 
 const connection = process.env.DB_CONNECTION;
 mongoose.connect(connection).then(async () => {
