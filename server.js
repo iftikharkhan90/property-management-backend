@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const mainRoutes = require("./api-routes/index");
-const { creatUser } = require("./Module/user/controller");
+const { creatadminUser } = require("./Module/user/controller");
 require("dotenv").config();
 const cors = require("cors");
 
@@ -17,10 +17,11 @@ app.use(
 
 const connection = process.env.DB_CONNECTION;
 mongoose.connect(connection).then(async () => {
-  await creatUser();
+  console.log("Db is connect")
+  await creatadminUser();
 });
 const Api = process.env.MAIN_API_ROUTE;
-app.use(Api, mainRoutes);
+app.use("/api", mainRoutes);
 
 const Port = process.env.PORT;
-app.listen(Port);
+app.listen(Port,console.log("Server is runung"));

@@ -8,7 +8,7 @@ const {
 } = require("./controller");
 
 const router = express.Router();
-router.post("/creatProject/:token", creatProjects);
+router.post("/creatProject", creatProjects);
 router.get("/getProjects/:token", showProjects);
 router.patch("/deleteProject/:id", deleteProject);
 router.patch("/partialUpdateProject/:id", partialUpdateProject);

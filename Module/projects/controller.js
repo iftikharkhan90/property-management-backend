@@ -5,33 +5,44 @@ const User = require("../../Model/adminUsers.model");
 //For creat porjects
 const creatProjects = async (req, res) => {
   try {
-    const token = req.params.token;
+    const { token } = req.body;
     if (!token) {
       return res
         .status(401)
         .json({ success: false, message: "Please login first" });
     }
-    const { ownerName, projectName, date, address, city, location } = req.body;
+    const {
+      projectName,
+      ownerName,
+      estimatedStartDate,
+      estimatedEndDate,
+      city,
+      address,
+    } = req.body;
 
     const result = verifyToken(token);
     if (!result.success) {
-      return res.status(401).json({ success: false, message: result.error });
+      return res.status(401).json({
+        success: false,
+        message: "please login first",
+        error: result.error,
+      });
     }
-    
+
     const userId = result.data.id;
-   
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(401).json({ message: "Please Login" });
     }
 
     const project = await Projects.create({
-      ownerName,
       projectName,
-      date,
-      address,
+      ownerName,
+      estimatedStartDate,
+      estimatedEndDate,
       city,
-      location,
+      address,
     });
     return res.status(201).json({
       success: true,
@@ -49,7 +60,7 @@ const creatProjects = async (req, res) => {
 //For sow all projects
 const showProjects = async (req, res) => {
   try {
-    const token = req.params.token;
+    const { token } = req.body;
     if (!token) {
       return res
         .status(401)
@@ -58,11 +69,12 @@ const showProjects = async (req, res) => {
 
     const result = verifyToken(token);
     if (!result.success) {
-      return res.status(401).json({ success: false, message: result.error });
+      return res.status(401).json({
+        success: false,
+        message: "please login first",
+        error: result.error,
+      });
     }
-
-    // // if you want only the user's projects
-    // const userId = result.data.id;
     const allProjects = await Projects.find({ isDelete: false });
 
     if (allProjects.length === 0) {
@@ -82,7 +94,7 @@ const showProjects = async (req, res) => {
 //For delete project
 const deleteProject = async (req, res) => {
   try {
-    const id = req.params.id;
+    const {id} = req.body;
     const project = await Projects.findByIdAndUpdate(
       id,
       { isDelete: true },
@@ -99,17 +111,30 @@ const deleteProject = async (req, res) => {
 //For partiacl update project
 const partialUpdateProject = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.body;
 
-    const { ownerName, projectName, date, address, city, location } = req.body;
-    const body = { ownerName, projectName, date, address, city, location };
+    const {
+      projectName,
+      ownerName,
+      estimatedStartDate,
+      estimatedEndDate,
+      city,
+      address,
+    } = req.body;
+    const body = {
+      projectName,
+      ownerName,
+      estimatedStartDate,
+      estimatedEndDate,
+      city,
+      address,
+    };
 
     Object.keys(body).forEach((key) => {
       if (body[key] === "" || body[key] === null || body[key] === undefined) {
         delete body[key];
       }
     });
-
 
     // Update project
     const project = await Projects.findByIdAndUpdate(
@@ -141,7 +166,7 @@ const partialUpdateProject = async (req, res) => {
 
 const allUpdateProject = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.body;
     const { ownerName, projectName, date, address, location, city } = req.body;
 
     const body = { ownerName, projectName, date, address, location, city };
@@ -176,6 +201,7 @@ module.exports = {
   partialUpdateProject,
   allUpdateProject,
 };
+
 // Object.keys(body).forEach(key => {
 //   if (body[key] === "" || body[key] === null || body[key] === undefined) {
 //     delete body[key];
