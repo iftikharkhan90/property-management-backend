@@ -1,16 +1,9 @@
 const Projects = require("../../Model/projects.model");
-const { verifyToken } = require("../user/service");
 const User = require("../../Model/adminUsers.model");
 
 //For creat porjects
 const creatProjects = async (req, res) => {
   try {
-    const { token } = req.body;
-    if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Please login first" });
-    }
     const {
       projectName,
       ownerName,
@@ -19,22 +12,6 @@ const creatProjects = async (req, res) => {
       city,
       address,
     } = req.body;
-
-    const result = verifyToken(token);
-    if (!result.success) {
-      return res.status(401).json({
-        success: false,
-        message: "please login first",
-        error: result.error,
-      });
-    }
-
-    const userId = result.data.id;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(401).json({ message: "Please Login" });
-    }
 
     const project = await Projects.create({
       projectName,
@@ -58,32 +35,18 @@ const creatProjects = async (req, res) => {
 };
 
 //For sow all projects
-const showProjects = async (req, res) => {
+const getProjects = async (req, res) => {
   try {
-    const { token } = req.body;
-    if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Please login first" });
-    }
 
-    const result = verifyToken(token);
-    if (!result.success) {
-      return res.status(401).json({
-        success: false,
-        message: "please login first",
-        error: result.error,
-      });
-    }
-    const allProjects = await Projects.find({ isDelete: false });
+    const projects = await Projects.find({ isDelete: false });
 
-    if (allProjects.length === 0) {
+    if (!projects ||projects.length === 0) {
       return res
         .status(404)
         .json({ success: false, message: "No projects found" });
     }
 
-    return res.status(200).json({ success: true, projects: allProjects });
+    return res.status(200).json({ success: true, projects: projects });
   } catch (err) {
     return res
       .status(500)
@@ -95,6 +58,9 @@ const showProjects = async (req, res) => {
 const deleteProject = async (req, res) => {
   try {
     const {id} = req.body;
+    if(!id){
+      return res.status(400).json()
+    }
     const project = await Projects.findByIdAndUpdate(
       id,
       { isDelete: true },
@@ -109,37 +75,17 @@ const deleteProject = async (req, res) => {
 };
 
 //For partiacl update project
-const partialUpdateProject = async (req, res) => {
+const patchProject = async (req, res) => {
   try {
-    const { id } = req.body;
-
-    const {
-      projectName,
-      ownerName,
-      estimatedStartDate,
-      estimatedEndDate,
-      city,
-      address,
-    } = req.body;
-    const body = {
-      projectName,
-      ownerName,
-      estimatedStartDate,
-      estimatedEndDate,
-      city,
-      address,
-    };
-
-    Object.keys(body).forEach((key) => {
-      if (body[key] === "" || body[key] === null || body[key] === undefined) {
-        delete body[key];
-      }
-    });
-
-    // Update project
+    const  {id} = req.params;
+    if(!id){
+      return res.status(400).json("id not found")
+    }
+    
+    const data = req.validatedData
     const project = await Projects.findByIdAndUpdate(
       id,
-      { $set: body },
+      { $set: data },
       { new: true }
     );
 
@@ -164,14 +110,15 @@ const partialUpdateProject = async (req, res) => {
   }
 };
 
-const allUpdateProject = async (req, res) => {
+const putProject = async (req, res) => {
   try {
-    const { id } = req.body;
-    const { ownerName, projectName, date, address, location, city } = req.body;
-
-    const body = { ownerName, projectName, date, address, location, city };
-
-    const project = await Projects.findByIdAndUpdate(id, body, { new: true });
+    const { id } = req.params;
+     if(!id){
+      return res.status(400).json("id not found")
+    }
+   
+    const data = req.validatedData;
+    const project = await Projects.findByIdAndUpdate(id, data,{ new: true });
 
     if (!project) {
       return res
@@ -196,14 +143,9 @@ const allUpdateProject = async (req, res) => {
 
 module.exports = {
   creatProjects,
-  showProjects,
+  getProjects,
   deleteProject,
-  partialUpdateProject,
-  allUpdateProject,
+  patchProject,
+  putProject,
 };
 
-// Object.keys(body).forEach(key => {
-//   if (body[key] === "" || body[key] === null || body[key] === undefined) {
-//     delete body[key];
-//   }
-// });
