@@ -1,36 +1,11 @@
 const user = require("../../Model/users.model");
+const User = require("../../Model/users.model");
 
 //For take Mazdoor data
 const createUser = async (req, res) => {
   try {
-    const { token } = req.params;
-    const { name, phoneNumber, dailyIncome, reciveIncome } = req.body;
-    if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Please login first" });
-    }
-    const result = verifyToken(token);
-    if (!result.success) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "please login first",
-          error: result.error,
-        });
-    }
-    if (!name || !phoneNumber || !dailyIncome) {
-      return res
-        .status(401)
-        .json({ success: false, message: "All input require" });
-    }
-    const _user = await user.create({
-      name,
-      phoneNumber,
-      dailyIncome,
-      reciveIncome,
-    });
+    const data = req.validatedData;
+    const _user = await user.create(data);
     return res.status(201).json({
       success: true,
       message: "user created successfull",
@@ -46,69 +21,44 @@ const createUser = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const { token } = req.params;
-    if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Please login first" });
-    }
-    const result = verifyToken(token);
-    if (!result.success) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "please login first",
-          error: result.error,
-        });
-    }
-    const allUser = await Projects.find({ isDelete: false });
+    const projects = await User.find({ isDelete: false });
 
-    if (allUser.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No projects found" });
+    if (!projects || projects.length === 0) {
+      return res.status(404).json({ success: false, message: "No User found" });
     }
-    return res.status(200).json({ success: true, user: allUser });
+
+    return res.status(200).json({ success: true, projects: projects });
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      error: "server error" + err.message,
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error: " + err.message });
   }
 };
 
-//For partiacl update project
-const partialUserProject = async (req, res) => {
+const patchUser = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!id) {
+      return res.status(400).json("id not found");
+    }
 
-    const { name, phoneNumber, dailyIncome, reciveIncome } = req.body;
-    const body = { name, phoneNumber, dailyIncome, reciveIncome };
-
-    Object.keys(body).forEach((key) => {
-      if (body[key] === "" || body[key] === null || body[key] === undefined) {
-        delete body[key];
-      }
-    });
-
-    // Update project
-    const _user = await user.findByIdAndUpdate(
+    const data = req.validatedData;
+    const project = await User.findByIdAndUpdate(
       id,
-      { $set: body },
+      { $set: data },
       { new: true }
     );
 
     if (!project) {
       return res
         .status(404)
-        .json({ success: false, message: "user not found" });
+        .json({ success: false, message: "Project not found" });
     }
 
     return res.status(200).json({
       success: true,
       message: "Update successful",
-      _user,
+      project,
     });
   } catch (error) {
     console.error(error);
@@ -119,4 +69,52 @@ const partialUserProject = async (req, res) => {
     });
   }
 };
-module.exports = { createUser };
+
+const putUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json("id not found");
+    }
+
+    const data = req.validatedData;
+    const project = await User.findByIdAndUpdate(id, data, { new: true });
+
+    if (!project) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Project not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Project replaced successfully",
+      project,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json("id not found");
+    }
+    const project = await User.findByIdAndUpdate(
+      id,
+      { isDelete: true },
+      { new: true }
+    );
+    return res.status(200).json({ success: true, user: project });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err });
+  }
+};
+module.exports = { createUser, putUser, patchUser, getUser, deleteUser };

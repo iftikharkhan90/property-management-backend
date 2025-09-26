@@ -4,27 +4,12 @@ const User = require("../../Model/adminUsers.model");
 //For creat porjects
 const creatProjects = async (req, res) => {
   try {
-    const {
-      projectName,
-      ownerName,
-      estimatedStartDate,
-      estimatedEndDate,
-      city,
-      address,
-    } = req.body;
-
-    const project = await Projects.create({
-      projectName,
-      ownerName,
-      estimatedStartDate,
-      estimatedEndDate,
-      city,
-      address,
-    });
+    const data = req.validatedData;
+    const _user = await Projects.create(data);
     return res.status(201).json({
       success: true,
-      message: "Project created successfull",
-      projects: project,
+      message: "user created successfull",
+      projects: _user,
     });
   } catch (err) {
     return res.status(500).json({
@@ -37,10 +22,9 @@ const creatProjects = async (req, res) => {
 //For sow all projects
 const getProjects = async (req, res) => {
   try {
-
     const projects = await Projects.find({ isDelete: false });
 
-    if (!projects ||projects.length === 0) {
+    if (!projects || projects.length === 0) {
       return res
         .status(404)
         .json({ success: false, message: "No projects found" });
@@ -57,9 +41,9 @@ const getProjects = async (req, res) => {
 //For delete project
 const deleteProject = async (req, res) => {
   try {
-    const {id} = req.body;
-    if(!id){
-      return res.status(400).json()
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).json();
     }
     const project = await Projects.findByIdAndUpdate(
       id,
@@ -77,12 +61,12 @@ const deleteProject = async (req, res) => {
 //For partiacl update project
 const patchProject = async (req, res) => {
   try {
-    const  {id} = req.params;
-    if(!id){
-      return res.status(400).json("id not found")
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json("id not found");
     }
-    
-    const data = req.validatedData
+
+    const data = req.validatedData;
     const project = await Projects.findByIdAndUpdate(
       id,
       { $set: data },
@@ -113,12 +97,12 @@ const patchProject = async (req, res) => {
 const putProject = async (req, res) => {
   try {
     const { id } = req.params;
-     if(!id){
-      return res.status(400).json("id not found")
+    if (!id) {
+      return res.status(400).json("id not found");
     }
-   
+
     const data = req.validatedData;
-    const project = await Projects.findByIdAndUpdate(id, data,{ new: true });
+    const project = await Projects.findByIdAndUpdate(id, data, { new: true });
 
     if (!project) {
       return res
@@ -148,4 +132,3 @@ module.exports = {
   patchProject,
   putProject,
 };
-
