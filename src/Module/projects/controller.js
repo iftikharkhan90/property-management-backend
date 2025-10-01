@@ -41,7 +41,7 @@ const getProjects = async (req, res) => {
 //For delete project
 const deleteProject = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     if (!id) {
       return res.status(400).json();
     }

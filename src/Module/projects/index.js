@@ -23,7 +23,7 @@ router.post(
   creatProjects
 );
 router.get("/get", [verifyTokenAndAttachUser], getProjects);
-router.patch("/delete", [verifyTokenAndAttachUser], deleteProject);
+router.patch("/delete/:id", [verifyTokenAndAttachUser], deleteProject);
 router.patch(
   "/patch/:id",
   [verifyTokenAndAttachUser, preprocessBody, validateCreatePatchRequest],
