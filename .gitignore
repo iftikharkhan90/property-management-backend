@@ -1,9 +1,21 @@
 # Dependency directory
+
 node_modules/
 
+
+
 # Environment variables
-.env
+
+
 
 # Build outputs
+
 dist/
+
 build/
+
+config.bat
+
+temp_auto_push.bat
+
+temp_interactive_push.bat
